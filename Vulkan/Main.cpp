@@ -1,5 +1,6 @@
-#include "Window.h"
+#include "Application.h"
 
-int main() {
-	Window window = Window();
+int main()
+{
+	Application().run();
 }

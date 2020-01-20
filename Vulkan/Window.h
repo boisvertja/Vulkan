@@ -9,13 +9,13 @@ public:
 
 	inline int getWindowWidth() const;
 	inline int getWindowHeight() const;
+	GLFWwindow* getWindow();
 
-private:
 	void setup();
-	void open();
 	void cleanup();
 
+private:
 	GLFWwindow* window;
-	static int WIDTH;
-	static int HEIGHT;
+	const int WIDTH = 650;
+	const int HEIGHT = 400;
 };

@@ -1,48 +1,44 @@
 #include "Window.h"
 
-int Window::WIDTH = 650;
-int Window::HEIGHT = 400;
-
-Window::Window() {
+Window::Window()
+{
     setup();
-    open();
 }
 
-Window::~Window() {
-	cleanup();
+Window::~Window()
+{
 }
 
-void Window::setup() {
+void Window::setup()
+{
     glfwInit();
 
+    // Tell GLFW not to create an OpenGL context by default
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
-
-    uint32_t extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-    std::cout << extensionCount << " extensions supported" << std::endl;
-
-    glm::mat4 matrix;
-    glm::vec4 vec;
-    auto test = matrix * vec;
 }
 
-void Window::open() {
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-    }
-}
-
-void Window::cleanup() {
+void Window::cleanup()
+{
     glfwDestroyWindow(window);
+    log("\nWindow Destroyed.");
+
     glfwTerminate();
+    log("GLFW Terminated.");
 }
 
-inline int Window::getWindowWidth() const {
+inline int Window::getWindowWidth() const
+{
     return WIDTH;
 }
 
-inline int Window::getWindowHeight() const {
+inline int Window::getWindowHeight() const
+{
     return HEIGHT;
+}
+
+GLFWwindow* Window::getWindow()
+{
+    return window;
 }
