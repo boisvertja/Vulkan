@@ -22,10 +22,10 @@ void Window::setup()
 void Window::cleanup()
 {
     glfwDestroyWindow(window);
-    log("\nWindow Destroyed.");
+    log("Window destroyed.");
 
     glfwTerminate();
-    log("GLFW Terminated.");
+    log("GLFW terminated.");
 }
 
 inline int Window::getWindowWidth() const

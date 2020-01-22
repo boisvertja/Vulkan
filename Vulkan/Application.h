@@ -1,4 +1,5 @@
 #pragma once
+#include "Vulkan.h"
 #include "Window.h"
 
 class Application
@@ -6,14 +7,11 @@ class Application
 public:
 	Application();
 	~Application();
-	int run();
+	bool run();
 
 private:
-	void initVulkan();
-	void createInstance();
-	void cleanup();
 	void loop();
 
+	Vulkan vulkan = Vulkan();
 	Window window = Window();
-	VkInstance instance;
 };

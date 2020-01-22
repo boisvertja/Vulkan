@@ -24,3 +24,29 @@
 #else
 	#define log(str)
 #endif
+
+class Vulkan
+{
+public:
+	Vulkan();
+	~Vulkan();
+	void initVulkan();
+	void cleanup();
+
+private:
+	void createInstance();
+	bool checkValidationLayerSupport();
+
+	VkInstance instance;
+
+	// Validation layers
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+
+	#ifdef DEBUG
+		const bool enableValidationLayers = true;
+	#else
+		const bool enableValidationLayers = false;
+	#endif
+};
