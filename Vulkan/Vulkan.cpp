@@ -11,6 +11,7 @@ Vulkan::~Vulkan()
 void Vulkan::initVulkan()
 {
 	createInstance();
+	pickPhysicalDevice();
 }
 
 void Vulkan::createInstance()
@@ -25,7 +26,7 @@ void Vulkan::createInstance()
 
 	// Vulkan struct type
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pApplicationName = "Hello Triangle";
+	appInfo.pApplicationName = "Vulkan";
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.pEngineName = "No Engine";
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -89,6 +90,41 @@ void Vulkan::createInstance()
 	}
 }
 
+// Select graphics card that provides requirements of Vulkan instance
+void Vulkan::pickPhysicalDevice()
+{
+	uint32_t deviceCount = 0;
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+	// If no graphics cards support Vulkan
+	if (deviceCount == 0)
+	{
+		throw std::runtime_error("Failed to find GPUs with Vulkan support.");
+	}
+
+	// Allocate vector to hold VkPhysicalDevice handles
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+	// Check if any of the physical devices are suitable for the desired Vulkan operations
+	// Check if any physical devices meet desired requirements
+	for (const auto& device : devices)
+	{
+		log("Device: " << getDeviceProperties(device).deviceName);
+
+		if (isDeviceSuitable(device))
+		{
+			physicalDevice = device;
+			break;
+		}
+	}
+	
+	if (physicalDevice == VK_NULL_HANDLE)
+	{
+		throw std::runtime_error("Failed to find suitable GPU.");
+	}
+}
+
 // Checks if all validation layers are supported
 bool Vulkan::checkValidationLayerSupport()
 {
@@ -122,6 +158,64 @@ bool Vulkan::checkValidationLayerSupport()
 
 	log("All validation layers available.");
 	return true;
+}
+
+VkPhysicalDeviceProperties Vulkan::getDeviceProperties(VkPhysicalDevice device)
+{
+	VkPhysicalDeviceProperties deviceProperties;
+	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+	return deviceProperties;
+}
+
+// Find queue families supported by physical device
+Vulkan::QueueFamilyIndices Vulkan::findQueueFamilies(VkPhysicalDevice device)
+{
+	QueueFamilyIndices indices;
+	
+	// Get list of queue families associated with each device
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+	// Need to find at least one queue family that supports 'VK_QUEUE_GRAPHICS_BIT'
+	int i = 0;
+	for (const auto& queueFamily : queueFamilies)
+	{
+		if (indices.isComplete())
+		{
+			break;
+		}
+
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			indices.graphicsFamily = i;
+		}
+		i++;
+	}
+
+	return indices;
+}
+
+bool Vulkan::isDeviceSuitable(VkPhysicalDevice device)
+{
+	// Determine device name, type, and supported Vulkan version
+	VkPhysicalDeviceProperties deviceProperties;
+	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+	// Query texture compression, 64-bit floats
+	VkPhysicalDeviceFeatures deviceFeatures;
+	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+	// Ensure a device was found that allows the necessary queue family
+	QueueFamilyIndices indices = findQueueFamilies(device);
+
+	// Check if device is dedicated graphics card and supports geometry shaders
+	return 
+		deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+		deviceFeatures.geometryShader && 
+		indices.isComplete();
 }
 
 void Vulkan::cleanup()

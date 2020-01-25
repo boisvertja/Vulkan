@@ -1,5 +1,4 @@
 #pragma once
-#include "Vulkan.h"
 #include "Window.h"
 
 class Application

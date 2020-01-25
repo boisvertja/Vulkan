@@ -15,6 +15,7 @@
 
 // Data Structures
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -34,15 +35,32 @@ public:
 	void cleanup();
 
 private:
-	void createInstance();
-	bool checkValidationLayerSupport();
+	struct QueueFamilyIndices
+	{
+		std::optional<uint32_t> graphicsFamily;
 
-	VkInstance instance;
+		bool isComplete()
+		{
+			return graphicsFamily.has_value();
+		}
+	};
 
 	// Validation layers
-	const std::vector<const char*> validationLayers = {
-		"VK_LAYER_KHRONOS_validation"
+	const std::vector<const char*> validationLayers =
+	{
+		"VK_LAYER_KHRONOS_validation",
+		"VK_LAYER_LUNARG_standard_validation"
 	};
+
+	void createInstance();
+	void pickPhysicalDevice();
+	bool checkValidationLayerSupport();
+	bool isDeviceSuitable(VkPhysicalDevice device);
+	VkPhysicalDeviceProperties getDeviceProperties(VkPhysicalDevice device);
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+
+	VkInstance instance;
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
 	#ifdef DEBUG
 		const bool enableValidationLayers = true;
