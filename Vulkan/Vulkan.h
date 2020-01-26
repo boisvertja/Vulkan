@@ -40,7 +40,7 @@ private:
 	};
 
 public:
-	Vulkan();
+	Vulkan(); // Test
 	~Vulkan();
 	void initVulkan();
 	void cleanup();
