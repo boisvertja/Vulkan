@@ -28,12 +28,6 @@
 
 class Vulkan
 {
-public:
-	Vulkan();
-	~Vulkan();
-	void initVulkan();
-	void cleanup();
-
 private:
 	struct QueueFamilyIndices
 	{
@@ -45,6 +39,13 @@ private:
 		}
 	};
 
+public:
+	Vulkan();
+	~Vulkan();
+	void initVulkan();
+	void cleanup();
+
+private:
 	// Validation layers
 	const std::vector<const char*> validationLayers =
 	{
@@ -54,6 +55,7 @@ private:
 
 	void createInstance();
 	void pickPhysicalDevice();
+	void createLogicalDevice();
 	bool checkValidationLayerSupport();
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	VkPhysicalDeviceProperties getDeviceProperties(VkPhysicalDevice device);
@@ -61,6 +63,8 @@ private:
 
 	VkInstance instance;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	VkDevice logicalDevice;
+	VkQueue graphicsQueue;
 
 	#ifdef DEBUG
 		const bool enableValidationLayers = true;

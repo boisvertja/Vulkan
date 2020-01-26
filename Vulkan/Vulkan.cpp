@@ -12,6 +12,7 @@ void Vulkan::initVulkan()
 {
 	createInstance();
 	pickPhysicalDevice();
+	createLogicalDevice();
 }
 
 void Vulkan::createInstance()
@@ -125,6 +126,55 @@ void Vulkan::pickPhysicalDevice()
 	}
 }
 
+/* 
+ * Specifies the queues to be created for the physical device
+ * Needed for creating images, buffers, loading shaders, setting pipeline state, etc. 
+ */
+void Vulkan::createLogicalDevice()
+{
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+	// Describes number of desired queues for queue family
+	VkDeviceQueueCreateInfo queueCreateInfo = {};
+	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	queueCreateInfo.queueCount = 1;
+
+	// Priority of queue's commands' execution, between 0.0f and 1.0f
+	float queuePriority = 1.0f;
+	queueCreateInfo.pQueuePriorities = &queuePriority;
+
+	// Specify device features that will be used
+	VkPhysicalDeviceFeatures deviceFeatures = {};
+
+	// Create the logical device
+	VkDeviceCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.pQueueCreateInfos = &queueCreateInfo;
+	createInfo.queueCreateInfoCount = 1;
+	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.enabledExtensionCount = 0;
+
+	if (enableValidationLayers)
+	{
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+	}
+	else
+	{
+		createInfo.enabledLayerCount = 0;
+	}
+
+	// Instantiate logical device instance
+	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Failed to create logical device.");
+	}
+
+	// Retrieve queue handles for each queue family
+	vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
+}
+
 // Checks if all validation layers are supported
 bool Vulkan::checkValidationLayerSupport()
 {
@@ -220,6 +270,7 @@ bool Vulkan::isDeviceSuitable(VkPhysicalDevice device)
 
 void Vulkan::cleanup()
 {
+	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroyInstance(instance, nullptr);
 	log("\nVulkan instance destroyed.");
 }
